@@ -1,0 +1,9 @@
+
+s	java:S135a"YReduce the total number of break and continue statements in this loop to use at most one.(˜ïˆžÿÿÿÿÿ
+G
+java:S1153Q"1Directly append the argument of String.valueOf().(Û±À„
+t	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(°Ëººþÿÿÿÿ
+E
+java:S2093("*Change this "try" to a try-with-resources.(¡»¢üùÿÿÿÿ
+Q	java:S125p"<This block of commented-out lines of code should be removed.(¡ðé³
+Q	java:S125v"<This block of commented-out lines of code should be removed.(·áçÆ
