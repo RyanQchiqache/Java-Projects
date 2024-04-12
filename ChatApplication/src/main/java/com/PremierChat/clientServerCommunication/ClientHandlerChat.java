@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-import com.PremierChat.clientServerCommunication.ChatServer;
 import javafx.application.Platform;
 import javafx.scene.control.TextInputDialog;
 
@@ -31,8 +30,14 @@ public class ClientHandlerChat implements Runnable {
         try {
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
-            chatServer.broadcastMessage(clientSocket.getInetAddress().getHostAddress() + " connected");
-            setName();
+
+            // Request client's name
+            out.println("Please enter your name:");
+            this.name = in.readLine().trim(); // Read client's name from input
+            out.println("Name accepted: " + this.name);
+
+            chatServer.broadcastMessage(clientSocket.getInetAddress().getHostAddress() + " connected as " + name);
+
             String message;
             while ((message = in.readLine()) != null) {
                 if (message.startsWith("@")) {

@@ -3,8 +3,9 @@ package com.PremierChat.clientServerCommunication;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +13,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Optional;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class ClientChat extends Application {
 
@@ -25,99 +33,99 @@ public class ClientChat extends Application {
 
     private TextArea output;
     private TextField input;
-
-    private Button readyButton;
-    private Button chatButton;
-    private boolean ready = false;
+    private Button sendButton;
 
     @Override
     public void start(Stage primaryStage) {
-        TextInputDialog dialog = new TextInputDialog();
+        TextInputDialog dialog = new TextInputDialog("localhost");
         dialog.setTitle("IP Address Input");
-        dialog.setHeaderText(null);
+        dialog.setHeaderText("Connect to Chat Server");
         dialog.setContentText("Enter the IP Address:");
-        dialog.showAndWait().ifPresent(ip -> address = ip);
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(ip -> address = ip);
 
         if (address != null && !address.isEmpty()) {
-            receiveMessage();
+            initializeConnection();
         }
 
         BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #2b2b2b, #1e1e1e);");
+
+        // Background image if needed
+        /*Image backgroundImage = new Image(getClass().getResource("/path/to/your/image.jpg").toExternalForm());
+        BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT);
+        root.setBackground(new Background(background));*/
+
         output = new TextArea();
         output.setEditable(false);
+        output.setStyle("-fx-background-color: #333; -fx-text-fill: #ddd; -fx-font-family: 'Consolas';");
+
         input = new TextField();
+        input.setPromptText("Enter your message here...");
+        input.setStyle("-fx-background-color: #555; -fx-text-fill: #ddd; -fx-font-family: 'Consolas';");
 
-        HBox buttonPanel = new HBox(10);
-        readyButton = new Button("Ready");
-        readyButton.setOnAction(e -> toggleReadyStatus());
-        chatButton = new Button("Send Message");
-        chatButton.setOnAction(e -> sendMessage(input.getText()));
+        sendButton = new Button("Send");
+        sendButton.setStyle("-fx-background-color: #5a5; -fx-text-fill: #fff;");
+        sendButton.setOnAction(event -> {
+            sendMessage(input.getText());
+            input.clear();
+        });
 
-        buttonPanel.getChildren().addAll(readyButton, chatButton, new Label("Selected Robot: ")); // Adjust or remove "Selected Robot:" if not relevant
+        HBox inputBox = new HBox(5, input, sendButton);
+        inputBox.setAlignment(Pos.BOTTOM_CENTER);
+        inputBox.setPadding(new Insets(10, 20, 10, 20));
 
-        root.setBottom(input);
+        root.setBottom(inputBox);
         root.setCenter(new ScrollPane(output));
-        root.setTop(buttonPanel);
 
         Scene scene = new Scene(root, 600, 400);
-        primaryStage.setTitle("Chat");
+        primaryStage.setTitle("Chat Client");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        input.setOnAction(event -> sendMessage(input.getText()));
+        input.setOnAction(event -> {
+            sendMessage(input.getText());
+            input.clear();
+        });
     }
 
-    private void toggleReadyStatus() {
-        ready = !ready;
-        String status = ready ? "Ready" : "Not Ready";
-        readyButton.setText(status);
-        sendMessage(ready ? "is ready" : "is not ready");
-    }
-
-    private void sendMessage(String message) {
-        if (!message.isEmpty()) {
-            out.println(message);
-            out.flush();
-            input.setText("");
-        }
-    }
-
-    private void receiveMessage() {
+    private void initializeConnection() {
         try {
             clientSocket = new Socket(address, port);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true);
 
-            new Thread(() -> {
-                try {
-                    String msg;
-                    while ((msg = in.readLine()) != null) {
-                        String finalMsg = msg;
-                        Platform.runLater(() -> output.appendText(finalMsg + "\n"));
-                    }
-                } catch (IOException ex) {
-                    Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.ERROR, "Connection failed: " + ex.getMessage());
-                        alert.showAndWait();
-                    });
-                    closeResources();
-                }
-            }).start();
-        } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Unable to connect: " + e.getMessage());
-            alert.showAndWait();
-            closeResources();
+            Thread receiveThread = new Thread(this::receiveMessage);
+            receiveThread.start();
+        } catch (IOException ex) {
+            showAlert("Connection Failed", "Could not connect to the server: " + ex.getMessage());
         }
     }
 
-    private void closeResources() {
+    private void receiveMessage() {
+        String message;
         try {
-            if (in != null) in.close();
-            if (out != null) out.close();
-            if (clientSocket != null) clientSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            while ((message = in.readLine()) != null) {
+                String msg = message;
+                Platform.runLater(() -> output.appendText(msg + "\n"));
+            }
+        } catch (IOException ex) {
+            Platform.runLater(() -> showAlert("Connection Lost", "Lost connection to the server: " + ex.getMessage()));
         }
+    }
+
+    private void sendMessage(String message) {
+        if (message != null && !message.isEmpty()) {
+            out.println(message);
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {
