@@ -1,12 +1,12 @@
-# 🚀 PremierChat: A Real-time Chat Application 🚀
+# PremierChat: A Real-time Chat Application
 
 Welcome to **PremierChat** - a state-of-the-art, real-time chat application crafted with Java. Experience seamless, instant messaging with an intuitive and modern interface.
 
-## 🌟 Overview
+## Overview
 
 PremierChat leverages a robust server-client architecture, enabling multiple users to connect and communicate effortlessly. Designed with user-friendliness in mind, it supports both public and private messaging, ensuring a dynamic and interactive chat experience.
 
-## 🗂 Repository Structure
+## Repository Structure
 
 The repository is organized as follows:
 
@@ -17,7 +17,7 @@ The repository is organized as follows:
 5. **LICENSE**: License information for the project.
 6. **README.md**: This readme file.
 
-## 🚀 Key Features
+## Key Features
 
 - **Real-time Communication**: Instantly exchange messages with other users.
 - **Private and Public Chat Rooms**: Engage in private conversations or join public chat rooms.
@@ -25,7 +25,7 @@ The repository is organized as follows:
 - **Network Communication**: Demonstrates client-server interactions using sockets.
 - **Scalable Architecture**: Easily expandable for additional features like file transfers and multimedia sharing.
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these steps to get the application up and running:
 
@@ -48,11 +48,11 @@ Follow these steps to get the application up and running:
     java Client
     ```
 
-## 📜 License
+## License
 
 This project is licensed under the Apache-2.0 License - see the LICENSE file for details.
 
-## ℹ️ About
+## About
 
 This repository is maintained by Ryan Qchiqache and aims to provide a comprehensive and modern approach to building real-time chat applications using Java.
 
